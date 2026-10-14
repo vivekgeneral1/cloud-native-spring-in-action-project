@@ -1,11 +1,13 @@
 package com.polarbookshop.catalogservice;
 
+import com.polarbookshop.catalogservice.exceptions.BookAlreadyExistsException;
+import com.polarbookshop.catalogservice.exceptions.BookNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BookService {
 
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
 
     public BookService(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
@@ -17,10 +19,13 @@ public class BookService {
 
     public Book getBook(String isbn) {
         return bookRepository.findByIsbn(isbn)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(() -> new BookNotFoundException(isbn));
     }
 
-    public Book saveBook(Book book) {
+    public Book createBook(Book book) {
+        if(bookRepository.existsByIsbn(book.isbn())){
+            throw new BookAlreadyExistsException(book.isbn());
+        }
         return bookRepository.save(book);
     }
 
@@ -34,7 +39,7 @@ public class BookService {
                             book.price()
                     );
                     return bookRepository.save(toUpdate);
-                }).orElseGet(() -> saveBook(book));
+                }).orElseGet(() -> createBook(book));
     }
 
     public void deleteBook(String isbn) {

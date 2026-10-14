@@ -1,9 +1,12 @@
 package com.polarbookshop.catalogservice;
 
+import org.springframework.stereotype.Repository;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Repository
 public class InMemoryBookRepository implements BookRepository {
 
     private static final Map<String, Book> books = new ConcurrentHashMap<>();
